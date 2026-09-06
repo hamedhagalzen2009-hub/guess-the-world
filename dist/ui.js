@@ -1,4 +1,4 @@
-const gameName = 'Gusse The World';
+const gameName = 'GUESS THE WORD';
 let onBackToMenu = null;
 export function initUI(onStartGame, onBack) {
     document.title = gameName;

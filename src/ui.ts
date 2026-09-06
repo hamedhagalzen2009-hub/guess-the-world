@@ -1,4 +1,4 @@
-const gameName = 'Gusse The World';
+const gameName = 'GUESS THE WORD';
 
 let onBackToMenu: (() => void) | null = null;
 

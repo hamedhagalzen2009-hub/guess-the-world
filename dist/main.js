@@ -120,15 +120,15 @@ hintButton === null || hintButton === void 0 ? void 0 : hintButton.addEventListe
 // تم التعديل هنا: inputs size
 function getInputSizeClasses(length) {
     if (length <= 5) {
-        return { box: 'h-16 w-16 sm:h-16 sm:w-16', margin: 'mx-2 sm:mx-2.5', text: 'text-2xl sm:text-2xl dark:text-black' };
+        return { box: 'h-11 w-11 md:h-16 md:w-16', margin: 'mx-1 md:mx-2.5', text: 'text-lg md:text-2xl dark:text-black' };
     }
     if (length <= 7) {
-        return { box: 'h-14 w-14 sm:h-14 sm:w-14', margin: 'mx-1.5 sm:mx-2', text: 'text-xl sm:text-xl dark:text-black' };
+        return { box: 'h-9 w-9 md:h-14 md:w-14', margin: 'mx-0.5 md:mx-2', text: 'text-base md:text-xl dark:text-black' };
     }
     if (length <= 9) {
-        return { box: 'h-12 w-12 sm:h-12 sm:w-12', margin: 'mx-1 sm:mx-1.5', text: 'text-lg sm:text-lg dark:text-black' };
+        return { box: 'h-8 w-8 md:h-12 md:w-12', margin: 'mx-0.5 md:mx-1.5', text: 'text-sm md:text-lg dark:text-black' };
     }
-    return { box: 'h-10 w-10 sm:h-10 sm:w-10', margin: 'mx-0.5 sm:mx-1', text: 'text-base sm:text-base dark:text-black' };
+    return { box: 'h-7 w-7 md:h-10 md:w-10', margin: 'mx-0.5 md:mx-1', text: 'text-xs md:text-base dark:text-black' };
 }
 function generateInput() {
     var _a;
@@ -147,6 +147,13 @@ function generateInput() {
             input.className = `input ${s.margin} my-0 ${s.box} ${s.text} text-center caret-[#333] bg-white border-b-2 border-b-black focus:outline-[#ccc] focus:outline-1.5 focus:border-none`;
             input.id = `guess-${i}-letter-${j}`;
             input.setAttribute('maxlength', '1');
+            input.setAttribute('inputmode', 'none');
+            input.setAttribute('autocomplete', 'off');
+            // احتياط إضافي لـ Chrome على أندرويد اللي أحياناً بيتجاهل inputmode
+            input.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                input.focus();
+            });
             div.appendChild(input);
         }
         (_a = inputsContener[0]) === null || _a === void 0 ? void 0 : _a.appendChild(div);
@@ -338,6 +345,7 @@ function handelCheck() {
             }
             if (msgMobile) {
                 msgMobile.innerHTML = `<span class="block mx-auto text-2xl md:text-3xl font-bold tracking-wide capitalize text-lose">${guessToWord}</span>`;
+                msgMobile.classList.remove('hidden');
             }
         }
     }
@@ -403,6 +411,7 @@ function resetBoard() {
     }
     if (msgMobile) {
         msgMobile.innerHTML = '';
+        msgMobile.classList.add('hidden');
     }
     if (checkButton) {
         checkButton.removeAttribute('disabled');
@@ -436,6 +445,7 @@ function advanceRound() {
         }
         if (msgMobile) {
             msgMobile.innerHTML = '';
+            msgMobile.classList.add('hidden');
         }
         if (roundIndicator) {
             roundIndicator.disabled = true;
@@ -479,7 +489,7 @@ initResults({
         (_b = document.getElementById('theme-toggle')) === null || _b === void 0 ? void 0 : _b.classList.remove('hidden');
     },
 });
-// npx @tailwindcss/cli -i ./src/style.css -o ./dist/output.css --watch
+// npx @tailwindcss/cli -i ./style.css -o ./output.css --watch
 // لا تحذف الكود الذي فوقي
 initKeyboard();
 initAchievements();

@@ -1,6 +1,6 @@
 var _c;
 {
-    let gameName = 'Gusse The World';
+    let gameName = 'GUESS THE WORD';
     document.title = gameName;
     const gameHeader = document.querySelector(".game-header");
     if (gameHeader)

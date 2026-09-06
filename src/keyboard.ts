@@ -122,7 +122,7 @@ function render(lang: 'en' | 'ar'): void {
 
     rows.forEach((row, rowIndex) => {
         const rowEl = document.createElement('div');
-        rowEl.className = 'flex gap-1.5 px-1';
+        rowEl.className = 'flex gap-1 px-0.5';
 
         // Center shorter rows by adding proportional side spacers (Wordle-style)
         const missing = maxLen - row.length;
@@ -135,7 +135,7 @@ function render(lang: 'en' | 'ar'): void {
 
         row.forEach((letter) => {
             const key = makeKey(letter, () => typeLetter(letter), KEY_BASE, letter);
-            key.style.flex = '1 1 0';
+            key.style.flex = '1.15 1 0';
             rowEl.appendChild(key);
         });
 

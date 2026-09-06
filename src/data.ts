@@ -39,7 +39,7 @@ export const categories: Category[] = [
   {
     name: "Real Madrid",
     image: "images/clubs/real-madrid.webp",
-    words: ["Vinicius", "Bellingham", "Mbappe", "Modric", "Courtois", "Rodrygo", "Militao"],
+    words: ["Vinicius", "Bellingham", "Mbappe", "Arnold", "Camavinga", "Rodrygo", "Militao"],
     hintText: "The Most Famous Current Players At Real Madrid"
   },
   {
@@ -51,7 +51,7 @@ export const categories: Category[] = [
   {
     name: "Barcelona",
     image: "images/clubs/barcelona.png",
-    words: ["Pedri", "Gavi", "Lewandowski", "Yamal", "Araujo", "Christensen", "Cubarsi"],
+    words: ["Pedri", "Gavi", "Yamal", "Cubarsi", "Balde", "Olmo", "Terstegen"],
     hintText: "The most famous current players at Barcelona"
   },
   {
@@ -132,6 +132,6 @@ export const categories: Category[] = [
     name: "كلانات السعودية",
     image: "images/clan/saudi-clans.jpg",
     words: ["لفلون", "البتابيت", "لينكس", "باور", "بيكس", "فالكون"],
-    hintText: "قبيلة سعودية معروفة تاريخياً"
+    hintText: "كلان سعودي مشهور في المملكة العربية السعودية"
   },
 ];

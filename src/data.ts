@@ -132,6 +132,6 @@ export const categories: Category[] = [
     name: "كلانات السعودية",
     image: "images/clan/saudi-clans.jpg",
     words: ["توتد", "نايت", "التيميتس", "باور", "بيكس", "فالكون"],
-    hintText: "قبيلة سعودية معروفة تاريخياً"
+    hintText: "كلان سعودي مشهور"
   },
 ];

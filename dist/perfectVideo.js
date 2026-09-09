@@ -1,5 +1,5 @@
 // فيديو الاحتفال/الخسارة الكاملة — يظهر بس لو كل جولات الجلسة نتيجتها واحدة
-const WIN_VIDEO_COUNT = 4; // عدد فيديوهات الفوز
+const WIN_VIDEO_COUNT = 3; // عدد فيديوهات الفوز
 const LOSE_VIDEO_COUNT = 3; // عدد فيديوهات الخسارة
 function pickRandomVideo(kind) {
     const count = kind === 'win' ? WIN_VIDEO_COUNT : LOSE_VIDEO_COUNT;

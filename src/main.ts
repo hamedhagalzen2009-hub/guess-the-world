@@ -1,5 +1,6 @@
 import { initUI } from './ui.js';
 import { categories, type Category } from './data.js';
+import { initSettingsFilter } from './settingsFilter.js';
 // تم التعديل هنا: استيراد دوال شاشة النتائج من ملف مستقل
 import { initResults, recordResult, resetResults, showResultsScreen } from './results.js';
 import { initKeyboard, setKeyboardForWord, updateKeyboardColors, resetKeyboardColors } from './keyboard.js';
@@ -28,14 +29,71 @@ categoryCheckboxes.forEach((checkbox) => {
         const checkedCount = getSelectedCategoryNames().length;
 
         if (checkedCount < MIN_SELECTED_CATEGORIES) {
-            checkbox.checked = true;
             categoryWarning?.classList.remove('hidden');
             setTimeout(() => {
                 categoryWarning?.classList.add('hidden');
             }, 2000);
         }
+
+        // تم التعديل هنا: كل ما المستخدم يغيّر اختياره، نتأكد من حالة زر ابدأ (يتفك أو يترقفل)
+        checkStartUnlockCondition();
     });
 });
+
+// ===== قفل زر "ابدأ" لحد ما المستخدم يدخل الاعدادات ويأكد اختيار 3 توبيكس على الاقل =====
+const startButton = document.getElementById('btn-start') as HTMLButtonElement | null;
+const settingsButton = document.getElementById('btn-settings');
+const settingsDoneButton = document.getElementById('settings-done-btn');
+const settingsCloseButton = document.getElementById('settings-close-btn');
+let isStartUnlocked = false;
+
+function lockStartButton(): void {
+    if (!startButton) return;
+    isStartUnlocked = false;
+    startButton.classList.add('opacity-50', 'grayscale', 'cursor-not-allowed');
+}
+
+function unlockStartButton(): void {
+    if (!startButton || isStartUnlocked) return;
+    isStartUnlocked = true;
+    startButton.classList.remove('opacity-50', 'grayscale', 'cursor-not-allowed');
+    settingsButton?.classList.remove('anim-settings-attention');
+}
+
+// تشغيل حركة اللفت (يمين شمال + توهج) على زر الاعدادات عشان توجه المستخدم ليه
+function playSettingsAttention(): void {
+    if (!settingsButton) return;
+    settingsButton.classList.remove('anim-settings-attention');
+    // إعادة تشغيل الأنيميشن حتى لو كانت شغالة أصلاً (إعادة الفلو)
+    void (settingsButton as HTMLElement).offsetWidth;
+    settingsButton.classList.add('anim-settings-attention');
+}
+
+function checkStartUnlockCondition(): void {
+    if (getSelectedCategoryNames().length >= MIN_SELECTED_CATEGORIES) {
+        unlockStartButton();
+    } else {
+        lockStartButton();
+    }
+}
+
+// طالما الزر مقفول، أي ضغطة عليه توقف تشغيل اللعبة وتلفت النظر لزر الاعدادات بدالها
+startButton?.addEventListener(
+    'click',
+    (e) => {
+        if (isStartUnlocked) return;
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        playSettingsAttention();
+    },
+    true
+);
+
+// لما المستخدم يدخل الاعدادات ويقفلها (Done أو X)، نتأكد من شرط الفتح
+settingsDoneButton?.addEventListener('click', checkStartUnlockCondition);
+settingsCloseButton?.addEventListener('click', checkStartUnlockCondition);
+
+lockStartButton();
 
 // settings panel
 const selectTries = document.getElementById("select-tries") as HTMLSelectElement | null;
@@ -50,6 +108,11 @@ let selectedCategory: Category | null = null;
 let totalRounds = selectRounds ? parseInt(selectRounds.value) : 5;
 let currentRound = 1;
 const roundResults: boolean[] = [];
+// تم التعديل هنا: تسجيل حروف الهنت عشان تفضل موجودة في كل المحاولات الجاية
+let hintedLetters: Record<number, string> = {};
+function getMaxHints(wordLength: number): number {
+    return wordLength >= 7 ? 3 : 2;
+}
 const roundIndicator = document.getElementById('round-indicator') as HTMLButtonElement | null;
 const ROUND_INDICATOR_BASE = 'bg-[#eee] dark:bg-neutral-800 text-black dark:text-neutral-100 px-3 py-1.5 text-xs md:px-6 md:py-2.5 md:text-base rounded-sm font-bold uppercase border-2 border-black border-b-4';
 
@@ -90,11 +153,50 @@ showImageBtn?.addEventListener('click', () => {
 });
 
 
+// ===== خوارزمية اختيار الكلمة بدون تكرار (Shuffle Bag) =====
+// الفكرة: نمنع تكرار أي كلمة لحد ما "الكيس" (كل الكلمات بالفئات المفعّلة) يخلص كامل،
+// وبعدين نعيد تعبيته من جديد بس نستبعد آخر كلمة لعبها اللاعب عشان ما تتكرر مباشرة بعد إعادة التعبيه.
+interface WordPair {
+    category: Category;
+    word: string;
+}
+
+const usedWordsBag = new Set<string>();
+let lastPlayedWord: string | null = null;
+
+function pickRandomWordAvoidingRepeat(activeCategories: Category[]): WordPair {
+    const allPairs: WordPair[] = [];
+    activeCategories.forEach((category) => {
+        category.words.forEach((word) => allPairs.push({ category, word }));
+    });
+
+    if (allPairs.length === 0) {
+        // احتياط أمان لا يفترض يحصل أبداً
+        return { category: activeCategories[0]!, word: '' };
+    }
+
+    // المرشحين: أي كلمة لسه ما لعبناها من هذا الكيس
+    let candidates = allPairs.filter((pair) => !usedWordsBag.has(pair.word.toLowerCase()));
+
+    // الكيس خلص (كل الكلمات لعبت) -> نعيد التعبيه ونستبعد آخر كلمة عشان ما تتكرر فوراً
+    if (candidates.length === 0) {
+        usedWordsBag.clear();
+        candidates = allPairs.filter((pair) => pair.word.toLowerCase() !== lastPlayedWord);
+        if (candidates.length === 0) {
+            candidates = allPairs;
+        }
+    }
+
+    const picked = candidates[Math.floor(Math.random() * candidates.length)]!;
+    usedWordsBag.add(picked.word.toLowerCase());
+    lastPlayedWord = picked.word.toLowerCase();
+    return picked;
+}
+
 function selectRound(): void {
     const activeCategories = getActiveCategories();
-    const category = activeCategories[Math.floor(Math.random() * activeCategories.length)]!;
-    const word = category.words[Math.floor(Math.random() * category.words.length)] ?? '';
-    
+    const { category, word } = pickRandomWordAvoidingRepeat(activeCategories);
+
     selectedCategory = category;
     guessToWord = word.toLowerCase();
     numberOfLetter = guessToWord.length;
@@ -148,6 +250,7 @@ function getInputSizeClasses(length: number): { box: string; margin: string; tex
 
 function generateInput() {
     const inputsContener = document.getElementsByClassName('inputs');
+    const isArabicWord = /[\u0600-\u06FF]/.test(guessToWord);
 
     for (let i = 1; i <= numberOfTries; i++) {
         const div = document.createElement('div');
@@ -156,6 +259,10 @@ function generateInput() {
 
         if (i !== 1) {
             div.className = `try-${i} disabled opacity-50 pointer-events-none mb-5 flex items-center justify-center`;
+        }
+
+        if (isArabicWord) {
+            div.setAttribute('dir', 'rtl');
         }
 
         for (let j = 1; j <= numberOfLetter; j++) {
@@ -194,24 +301,28 @@ function generateInput() {
             const currentIndex = Array.from(inputs).indexOf(input);
 
             if (event.key === 'ArrowRight') {
-                const nextInput = currentIndex + 1;
-                if (nextInput < inputs.length) inputs[nextInput]!.focus();
+                const targetIndex = isArabicWord ? currentIndex - 1 : currentIndex + 1;
+                if (targetIndex >= 0 && targetIndex < inputs.length) inputs[targetIndex]!.focus();
             }
 
             if (event.key === 'ArrowLeft') {
-                const prevInput = currentIndex - 1;
-                if (prevInput >= 0) inputs[prevInput]!.focus();
+                const targetIndex = isArabicWord ? currentIndex + 1 : currentIndex - 1;
+                if (targetIndex >= 0 && targetIndex < inputs.length) inputs[targetIndex]!.focus();
             }
 
             if (event.key === 'Backspace') {
                 event.preventDefault();
 
-                if (input.value !== '') {
+                if (input.readOnly) {
+                    // تم التعديل هنا: خانة هنت، مينفعش تتمسح
+                } else if (input.value !== '') {
                     input.value = '';
                 } else if (currentIndex > 0) {
                     const prevInput = inputs[currentIndex - 1];
-                    if (prevInput) {
+                    if (prevInput && !prevInput.readOnly) {
                         prevInput.value = '';
+                        prevInput.focus();
+                    } else if (prevInput) {
                         prevInput.focus();
                     }
                 }
@@ -317,7 +428,7 @@ if (success) {
         (window as any).playSfx?.('correct');
         pulseRowCorrect(document.querySelector(`.try-${curent}`));
         roundResults.push(true);
-        incrementRoundsPlayed();
+        incrementRoundsPlayed(true, curent, numberOfHints < getMaxHints(numberOfLetter));
         // تم التعديل هنا: تسجيل إجابة صحيحة في عدّاد النتائج
         recordResult(true);
         setRoundIndicatorEnabled(true);
@@ -363,7 +474,7 @@ if (success) {
                 } else {
             (window as any).playSfx?.('gameOver');
             roundResults.push(false);
-            incrementRoundsPlayed();
+            incrementRoundsPlayed(false, curent, numberOfHints < getMaxHints(numberOfLetter));
             // تم التعديل هنا: تسجيل إجابة خاطئة في عدّاد النتائج
             recordResult(false);
             setRoundIndicatorEnabled(true);
@@ -432,6 +543,9 @@ function handelHints() {
 
     if (indexToFill !== -1 && guessToWord[indexToFill]) {
         randomInput.value = guessToWord[indexToFill].toUpperCase();
+        randomInput.readOnly = true;
+        // تم التعديل هنا: نحفظ الحرف عشان يظهر تلقائي في المحاولة الجاية
+        hintedLetters[indexToFill] = guessToWord[indexToFill]!;
     }
 }
 
@@ -451,7 +565,8 @@ function updateRoundIndicator() {
 
 function resetBoard() {
     curent = 1;
-    numberOfHints = 2;
+    numberOfHints = getMaxHints(numberOfLetter);
+    hintedLetters = {};
     resetKeyboardColors();
     
     if (hintCountElement) {
@@ -547,6 +662,7 @@ initResults({
 // npx @tailwindcss/cli -i ./style.css -o ./output.css --watch
 // لا تحذف الكود الذي فوقي
 
+initSettingsFilter();
 initKeyboard();
 initAchievements();
 

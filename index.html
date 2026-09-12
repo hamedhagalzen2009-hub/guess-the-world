@@ -36,7 +36,7 @@
 <body class="m-0 bg-[#eee] dark:bg-neutral-900 text-black dark:text-neutral-100 font-sans transition-colors duration-300">
 
     <!-- Dark Mode Toggle Switch (Neo-Brutalist Style) -->
-<button id="theme-toggle" type="button" aria-label="Toggle Theme" class="fixed top-4 right-4 sm:top-6 sm:right-6 z-50 flex items-center w-16 h-9 p-1 bg-[#f7e012] dark:bg-neutral-800 border-2 border-black border-b-4 rounded-full cursor-pointer transition-colors duration-300 active:translate-y-0.5">
+<button id="theme-toggle" type="button" aria-label="Toggle Theme" class="fixed top-4 right-2.5 sm:top-6 sm:right-6 z-50 flex items-center w-16 h-9 p-1 bg-[#f7e012] dark:bg-neutral-800 border-2 border-black border-b-4 rounded-full cursor-pointer transition-colors duration-300 active:translate-y-0.5">
     <div id="theme-toggle-knob" class="w-6 h-6 bg-white dark:bg-neutral-900 border-2 border-black rounded-full flex items-center justify-center transition-transform duration-300 transform translate-x-0 dark:translate-x-7 shadow-sm">
         <!-- Moon Icon (Light Mode) -->
         <svg class="w-3.5 h-3.5 text-black block dark:hidden fill-current" viewBox="0 0 24 24">
@@ -536,7 +536,7 @@
                 <div class="inputs overflow-x-auto shrink-0"></div>
 
                 <!-- Virtual on-screen keyboard (mobile only) -->
-                <div id="virtual-keyboard" class="md:hidden mt-3 shrink-0 flex flex-col gap-2 select-none"></div>
+                <div id="virtual-keyboard" class="[@media(any-pointer:fine)]:hidden mt-3 shrink-0 flex flex-col gap-2 select-none"></div>
 
 <div class="control mt-3 md:mt-4 flex flex-nowrap md:flex-wrap justify-center gap-2 md:gap-2 shrink-0">
     <button id="Check" type="button" class="bg-[#f7e012] text-black dark:text-black px-4 py-2.5 text-sm md:px-6 md:py-2.5 md:text-base rounded-sm font-bold uppercase border-2 border-black border-b-4 cursor-pointer active:border-b-2 active:translate-y-0.5 disabled:bg-black dark:disabled:bg-neutral-700 disabled:text-[#eee] dark:disabled:text-neutral-400 disabled:opacity-40 disabled:cursor-no-drop disabled:pointer-events-none">

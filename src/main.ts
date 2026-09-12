@@ -4,7 +4,9 @@ import { initSettingsFilter } from './settingsFilter.js';
 // تم التعديل هنا: استيراد دوال شاشة النتائج من ملف مستقل
 import { initResults, recordResult, resetResults, showResultsScreen } from './results.js';
 import { initKeyboard, setKeyboardForWord, updateKeyboardColors, resetKeyboardColors } from './keyboard.js';
-import { initAchievements, incrementRoundsPlayed } from './achievements.js';
+import { initAchievements, incrementRoundsPlayed, getStats, getUnlockedIds } from './achievements.js';
+import { initLeaderboardBar, setLeaderboardControlsVisible } from './leaderboardBar.js';
+import { saveMyResults } from './leaderboard.js';
 
 // اختيار الفئات
 const categoryCheckboxes = document.querySelectorAll<HTMLInputElement>('.category-checkbox');
@@ -347,7 +349,6 @@ selectRounds?.addEventListener("change", (e) => {
     totalRounds = parseInt(target.value);
 });
 
-
 function handelCheck() {
     let success = true;
 
@@ -620,6 +621,8 @@ function advanceRound() {
             roundIndicator.classList.add('hidden');
         }
         showResultsScreen();
+        // بتحفظ في Firestore لو المستخدم مسجل دخول فقط (saveMyResults نفسها بتتأكد من ده)
+        saveMyResults(getStats(), getUnlockedIds());
     }
 }
 
@@ -627,6 +630,7 @@ roundIndicator?.addEventListener('click', advanceRound);
 
 // تم التعديل هنا: إعادة تشغيل لعبة جديدة من شاشة النتائج
 function restartGame(): void {
+    setLeaderboardControlsVisible(false);
     currentRound = 1;
     roundResults.length = 0;
     numberOfTries = selectTries ? parseInt(selectTries.value) : 6;
@@ -654,17 +658,18 @@ initResults({
         resetResults();
         currentRound = 1;
         roundResults.length = 0;
+        setLeaderboardControlsVisible(true);
         document.getElementById('games-promo-container')?.classList.remove('hidden');
         document.getElementById('theme-toggle')?.classList.remove('hidden');
     },
 });
 
 // npx @tailwindcss/cli -i ./style.css -o ./output.css --watch
-// لا تحذف الكود الذي فوقي
 
 initSettingsFilter();
 initKeyboard();
 initAchievements();
+initLeaderboardBar();
 
 initUI(
     () => {

@@ -33,7 +33,7 @@ const GRAND_PRIZE = {
     // ماله شرط مستقل، بيفتح لما كل الإنجازات العادية تفتح — يتفحص بشكل منفصل
     check: () => false,
 };
-function getStats() {
+export function getStats() {
     var _a, _b, _c, _d;
     const raw = localStorage.getItem(STORAGE_KEY);
     const totalRounds = raw ? parseInt(raw, 10) || 0 : 0;
@@ -45,7 +45,7 @@ function getStats() {
         noHintWins: parseInt((_d = localStorage.getItem(STATS_KEYS.noHintWins)) !== null && _d !== void 0 ? _d : '0', 10) || 0,
     };
 }
-function setStats(stats) {
+export function setStats(stats) {
     localStorage.setItem(STORAGE_KEY, String(stats.totalRounds));
     localStorage.setItem(STATS_KEYS.currentStreak, String(stats.currentStreak));
     localStorage.setItem(STATS_KEYS.bestStreak, String(stats.bestStreak));
@@ -60,6 +60,28 @@ function markUnlocked(id) {
 }
 function areAllAchievementsUnlocked() {
     return ACHIEVEMENT_LEVELS.every((level) => isUnlocked(level.id));
+}
+// كل الـ IDs الممكنة (بما فيها الجائزة الكبرى) — بتستخدم وقت الحفظ/التحميل من Firestore
+const ALL_ACHIEVEMENT_IDS = [...ACHIEVEMENT_LEVELS.map((l) => l.id), PRIZE_ID];
+/** الإنجازات المفتوحة حالياً محلياً — بترجع array من الـ ids عشان تتخزن في Firestore */
+export function getUnlockedIds() {
+    return ALL_ACHIEVEMENT_IDS.filter((id) => isUnlocked(id));
+}
+/**
+ * بتحل محل كل التقدم المحلي بتقدم جاي من Firestore (بتتنادى لما المستخدم يسجل دخول).
+ * بنمسح كل حاجة قديمة الأول عشان محدش يفضل عالق من حساب/جلسة سابقة.
+ */
+export function applyCloudProgress(stats, unlockedIds) {
+    setStats(stats);
+    ALL_ACHIEVEMENT_IDS.forEach((id) => localStorage.removeItem(UNLOCKED_KEY_PREFIX + id));
+    unlockedIds.forEach((id) => markUnlocked(id));
+    renderAchievementsModal();
+}
+/** بترجع كل التقدم للصفر — بتتنادى وقت تسجيل الخروج، أو لحساب جديد لسه ملوش بيانات في Firestore */
+export function resetLocalProgress() {
+    setStats({ totalRounds: 0, currentStreak: 0, bestStreak: 0, firstTryWins: 0, noHintWins: 0 });
+    ALL_ACHIEVEMENT_IDS.forEach((id) => localStorage.removeItem(UNLOCKED_KEY_PREFIX + id));
+    renderAchievementsModal();
 }
 let onNewUnlock = null;
 /**

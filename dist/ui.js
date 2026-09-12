@@ -1,3 +1,4 @@
+import { setLeaderboardControlsVisible } from './leaderboardBar.js';
 const gameName = 'GUESS THE WORD';
 let onBackToMenu = null;
 export function initUI(onStartGame, onBack) {
@@ -69,11 +70,13 @@ function setupUI(onStartGame) {
     function openBackConfirm() {
         backConfirmModal === null || backConfirmModal === void 0 ? void 0 : backConfirmModal.classList.remove('hidden');
         document.body.classList.add('overflow-hidden');
+        setLeaderboardControlsVisible(true);
     }
     backToMenuDesktop === null || backToMenuDesktop === void 0 ? void 0 : backToMenuDesktop.addEventListener('click', openBackConfirm);
     backToMenuMobile === null || backToMenuMobile === void 0 ? void 0 : backToMenuMobile.addEventListener('click', openBackConfirm);
     cancelBackBtn === null || cancelBackBtn === void 0 ? void 0 : cancelBackBtn.addEventListener('click', () => {
         backConfirmModal === null || backConfirmModal === void 0 ? void 0 : backConfirmModal.classList.add('hidden');
+        setLeaderboardControlsVisible(false);
         document.body.classList.remove('overflow-hidden');
     });
     backConfirmModal === null || backConfirmModal === void 0 ? void 0 : backConfirmModal.addEventListener('click', (event) => {

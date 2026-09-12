@@ -1,3 +1,5 @@
+import { setLeaderboardControlsVisible } from './leaderboardBar.js';
+
 const gameName = 'GUESS THE WORD';
 
 let onBackToMenu: (() => void) | null = null;
@@ -84,6 +86,7 @@ function setupUI(onStartGame: () => void): void {
     function openBackConfirm() {
         backConfirmModal?.classList.remove('hidden');
         document.body.classList.add('overflow-hidden');
+        setLeaderboardControlsVisible(true);
     }
 
     backToMenuDesktop?.addEventListener('click', openBackConfirm);
@@ -91,6 +94,7 @@ function setupUI(onStartGame: () => void): void {
 
     cancelBackBtn?.addEventListener('click', () => {
         backConfirmModal?.classList.add('hidden');
+        setLeaderboardControlsVisible(false);
         document.body.classList.remove('overflow-hidden');
     });
 

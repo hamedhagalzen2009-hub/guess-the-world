@@ -95,7 +95,7 @@ export const categories: Category[] = [
   },
   {
     name: "Arab Countries In Asia",
-    image: "images/regions/arab-regions-asia.jpg",
+    image: "images/regions/arab-regions.jpg",
     words: ["Iraq", "Saudi Arabia", "Yemen", "Oman", "Palestine", "Kuwait", "Syria", "Lebanon"],
     hintText: "An Arab country located in Asia"
   },

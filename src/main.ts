@@ -110,6 +110,7 @@ let selectedCategory: Category | null = null;
 let totalRounds = selectRounds ? parseInt(selectRounds.value) : 5;
 let currentRound = 1;
 const roundResults: boolean[] = [];
+const isTouchDevice = window.matchMedia('(any-pointer: coarse)').matches;
 // تم التعديل هنا: تسجيل حروف الهنت عشان تفضل موجودة في كل المحاولات الجاية
 let hintedLetters: Record<number, string> = {};
 function getMaxHints(wordLength: number): number {
@@ -274,7 +275,7 @@ function generateInput() {
             input.className = `input ${s.margin} my-0 ${s.box} ${s.text} text-center caret-[#333] bg-white border-b-2 border-b-black focus:outline-[#ccc] focus:outline-1.5 focus:border-none`;
             input.id = `guess-${i}-letter-${j}`;
             input.setAttribute('maxlength', '1');
-            input.setAttribute('inputmode', 'none');
+            if (isTouchDevice) { input.setAttribute('inputmode', 'none'); }
             input.setAttribute('autocomplete', 'off');
             // احتياط إضافي لـ Chrome على أندرويد اللي أحياناً بيتجاهل inputmode
             input.addEventListener('touchstart', (e) => {
